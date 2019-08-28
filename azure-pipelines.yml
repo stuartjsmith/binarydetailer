@@ -34,7 +34,7 @@ steps:
 
 - task: GitHubRelease@0
   inputs:
-    gitHubConnection: stuartjsmithgh
+    gitHubConnection: ghbuild
     repositoryName: '$(Build.Repository.Name)'
     action: 'create'
     target: '$(Build.SourceVersion)'
