@@ -45,6 +45,7 @@ namespace NetVersionChecker
                 }
                 Console.WriteLine();
             }
+            Console.In.ReadLine();
         }
 
         static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
