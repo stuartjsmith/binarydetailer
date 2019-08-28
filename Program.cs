@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace NetVersionChecker
 {
     class Program
     {
          static void Main(string[] args)
-        {
+         { 
 
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += new ResolveEventHandler(CurrentDomain_ReflectionOnlyAssemblyResolve);
             string path = args[0];
@@ -52,9 +50,7 @@ namespace NetVersionChecker
         static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
 
         {
-
             return System.Reflection.Assembly.ReflectionOnlyLoad(args.Name);
-
         }
     }
 
