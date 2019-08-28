@@ -31,3 +31,13 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: GitHubRelease@0
+  inputs:
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'auto'
+    compareWith: 'lastFullRelease'
+    assets: |
+         $(Build.ArtifactStagingDirectory)/*.exe
