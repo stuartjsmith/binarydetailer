@@ -26,6 +26,8 @@ namespace BinaryDetailer
             return 
                 "\"" + FullPath + "\"," +
                 "\"" + FileName + "\"," +
+                "\"" + AssemblyCompanyAttribute + "\"," +
+                "\"" + AssemblyCopyrightAttribute + "\"," +
                 "\"" + AssemblyVersion + "\"," +
                 "\"" + FileVersion + "\"," +
                 "\"" + ProductVersion + "\"," +
@@ -41,12 +43,14 @@ namespace BinaryDetailer
         {
             get
             {
-                return new[] { "Full Path,FileName,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error" };
+                return new[] { "Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error" };
             }
         }
 
         public string AssemblyVersion { get; internal set; }
         public string FileVersion { get; internal set; }
         public string ProductVersion { get; internal set; }
+        public string AssemblyCompanyAttribute { get; internal set; }
+        public string AssemblyCopyrightAttribute { get; internal set; }
     }
 }

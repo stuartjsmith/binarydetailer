@@ -36,6 +36,8 @@ namespace BinaryDetailer
                     bd.FileVersion = FileVersionInfo.GetVersionInfo(binary).FileVersion;
                     bd.ProductVersion = FileVersionInfo.GetVersionInfo(binary).ProductVersion;
 
+                    //AssemblyCompanyAttribute, AssemblyCopyrightAttribute
+
                     PortableExecutableKinds peKind;
                     ImageFileMachine machine;
                     loadFrom.ManifestModule.GetPEKind(out peKind, out machine);
@@ -46,21 +48,15 @@ namespace BinaryDetailer
                     bd.ProcessorArchitecture = pe;
 
                     Assembly loadFromReflectionOnly = Assembly.ReflectionOnlyLoadFrom(binary);
-                    bool TargetFrameworkAttributeFound = false;
-                    foreach (CustomAttributeData att in loadFromReflectionOnly.CustomAttributes)
-                    {
-                        if (att.AttributeType == typeof(System.Runtime.Versioning.TargetFrameworkAttribute))
-                        {
-                            bd.TargetFrameworkAttribute = att.ConstructorArguments[0].ToString().Replace("\"", "");
-                            TargetFrameworkAttributeFound = true;
-                            break;
-                        }
-                    }
-                    if(!TargetFrameworkAttributeFound)
-                    {
-                        string message = "No TargetFrameworkAttribute found on this assembly";
-                        bd.Error = message;
-                    }
+
+                    var tfa = loadFromReflectionOnly.CustomAttributes.Where(a => a.AttributeType == typeof(System.Runtime.Versioning.TargetFrameworkAttribute)).ToList();
+                    if (tfa.Count == 1) bd.TargetFrameworkAttribute = tfa[0].ConstructorArguments[0].ToString().Replace("\"", "");
+
+                    var aca = loadFromReflectionOnly.CustomAttributes.Where(a => a.AttributeType == typeof(AssemblyCompanyAttribute)).ToList();
+                    if (aca.Count == 1) bd.AssemblyCompanyAttribute = aca[0].ConstructorArguments[0].ToString().Replace("\"", "");
+
+                    var aco = loadFromReflectionOnly.CustomAttributes.Where(a => a.AttributeType == typeof(AssemblyCopyrightAttribute)).ToList();
+                    if (aco.Count == 1) bd.AssemblyCopyrightAttribute = aco[0].ConstructorArguments[0].ToString().Replace("\"", "");
                 }
                 catch (Exception e)
                 {
