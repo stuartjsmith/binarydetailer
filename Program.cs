@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace NetVersionChecker
+namespace BinaryDetailer
 {
     internal class Program
     {
