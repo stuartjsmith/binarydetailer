@@ -9,7 +9,8 @@ namespace NetVersionChecker
 {
     class Program
     {
-         static void Main(string[] args)
+        static string currentBinary = string.Empty;
+        static void Main(string[] args)
          {
             string path = args[0];
             List<NetFileCheck> netFileChecks = new List<NetFileCheck>();
@@ -19,6 +20,7 @@ namespace NetVersionChecker
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += new ResolveEventHandler(CurrentDomain_ReflectionOnlyAssemblyResolve);
             foreach(string binary in allFiles)
             {
+                currentBinary = binary;
                 NetFileCheck nfc = new NetFileCheck(binary);
                 netFileChecks.Add(nfc);
                 Console.WriteLine(binary);
@@ -68,7 +70,7 @@ namespace NetVersionChecker
         static Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
             AssemblyName assemblyName = new AssemblyName(args.Name);
-            string assemblyPath = Environment.CurrentDirectory + "\\" + assemblyName.Name + ".dll";
+            string assemblyPath = Path.GetDirectoryName(currentBinary) + "\\" + assemblyName.Name + ".dll";
 
             if (File.Exists(assemblyPath))
             {
