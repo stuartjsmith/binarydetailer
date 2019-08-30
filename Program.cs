@@ -51,7 +51,7 @@ namespace NetVersionChecker
                     {
                         if (att.AttributeType == typeof(System.Runtime.Versioning.TargetFrameworkAttribute))
                         {
-                            bd.TargetFrameworkAttribute = att.ConstructorArguments[0].ToString();
+                            bd.TargetFrameworkAttribute = att.ConstructorArguments[0].ToString().Replace("\"", "");
                             TargetFrameworkAttributeFound = true;
                             break;
                         }

@@ -23,7 +23,18 @@ namespace NetVersionChecker
 
         public string ToCsv()
         {
-            return FullPath + "," + FileName + "," + AssemblyVersion + "," + FileVersion + "," + ProductVersion + "," + ImageRuntimeVersion + "," + TargetFrameworkAttribute + "," + PEKind + "," + ImageFileMachine + "," + ProcessorArchitecture + "," + Error;
+            return 
+                "\"" + FullPath + "\"," +
+                "\"" + FileName + "\"," +
+                "\"" + AssemblyVersion + "\"," +
+                "\"" + FileVersion + "\"," +
+                "\"" + ProductVersion + "\"," +
+                "\"" + ImageRuntimeVersion + "\"," +
+                "\"" + TargetFrameworkAttribute + "\"," +
+                "\"" + PEKind + "\"," +
+                "\"" + ImageFileMachine + "\"," +
+                "\"" + ProcessorArchitecture + "\"," +
+                "\"" + Error + "\"";
         }
 
         public static string[] CSVHeader
