@@ -1,31 +1,54 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
 namespace BinaryDetailer
 {
-    internal class BinaryDetail
+    [Serializable]
+    public class BinaryDetail
     {
-        public BinaryDetail(string fullPath)
+
+        public BinaryDetail(FileInfo fileInfo)
         {
-            FullPath = fullPath;
-            FileName = Path.GetFileName(fullPath);
+            FileInfo = fileInfo;
         }
 
-        public string FullPath;
-        public string FileName;
-        public string ImageRuntimeVersion = String.Empty;
-        public string TargetFrameworkAttribute = String.Empty;
-        public string Error = String.Empty;
-        public PortableExecutableKinds PEKind;
-        public ImageFileMachine ImageFileMachine;
-        public ProcessorArchitecture ProcessorArchitecture;
+        public string Error { get; internal set; }
+        public FileInfo FileInfo { get; internal set; }
+        public ImageFileMachine ImageFileMachine { get; internal set; }
+        public string ImageRuntimeVersion { get; internal set; }
+        public PortableExecutableKinds PEKind { get; internal set; }
+        public ProcessorArchitecture ProcessorArchitecture { get; internal set; }
+        public string TargetFrameworkAttribute { get; internal set; }
+        public string AssemblyVersion { get; internal set; }
+
+        public string FileVersion => FileVersionInfo.GetVersionInfo(FileInfo.FullName).FileVersion;
+
+        public string ProductVersion => FileVersionInfo.GetVersionInfo(FileInfo.FullName).ProductVersion;
+
+        public string AssemblyCompanyAttribute { get; internal set; }
+        public string AssemblyCopyrightAttribute { get; internal set; }
+
+
+        public static string[] CSVHeader
+        {
+            get
+            {
+                return new[]
+                {
+                    "Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error"
+                };
+            }
+        }
+
 
         public string ToCsv()
         {
-            return 
-                "\"" + FullPath + "\"," +
-                "\"" + FileName + "\"," +
+            return
+                "\"" + FileInfo.FullName + "\"," +
+                "\"" + FileInfo.Name + "\"," +
                 "\"" + AssemblyCompanyAttribute + "\"," +
                 "\"" + AssemblyCopyrightAttribute + "\"," +
                 "\"" + AssemblyVersion + "\"," +
@@ -38,19 +61,5 @@ namespace BinaryDetailer
                 "\"" + ProcessorArchitecture + "\"," +
                 "\"" + Error + "\"";
         }
-
-        public static string[] CSVHeader
-        {
-            get
-            {
-                return new[] { "Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error" };
-            }
-        }
-
-        public string AssemblyVersion { get; internal set; }
-        public string FileVersion { get; internal set; }
-        public string ProductVersion { get; internal set; }
-        public string AssemblyCompanyAttribute { get; internal set; }
-        public string AssemblyCopyrightAttribute { get; internal set; }
     }
 }
