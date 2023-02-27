@@ -47,7 +47,11 @@ namespace BinaryDetailer
                     }
                     catch (Exception e)
                     {
-                        bd.Error = e.Message;
+                        // this is the error thrown I think where we try to load a native dll using ReflectionOnlyLoadFrom, so ignore that specific message
+                        if (!e.Message.Contains("The module was expected to contain an assembly manifest."))
+                        {
+                            bd.Error = e.Message;
+                        }
                     }
                 }
 
