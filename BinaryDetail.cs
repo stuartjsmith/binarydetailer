@@ -28,8 +28,8 @@ namespace BinaryDetailer
 
         public string ProductVersion => FileVersionInfo.GetVersionInfo(FileInfo.FullName).ProductVersion;
 
-        public string AssemblyCompanyAttribute { get; internal set; }
-        public string AssemblyCopyrightAttribute { get; internal set; }
+        public string AssemblyCompanyAttribute => FileVersionInfo.GetVersionInfo(FileInfo.FullName).CompanyName;
+        public string AssemblyCopyrightAttribute => FileVersionInfo.GetVersionInfo(FileInfo.FullName).LegalCopyright;
 
 
         public static string[] CSVHeader

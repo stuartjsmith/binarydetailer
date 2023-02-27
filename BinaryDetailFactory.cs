@@ -108,8 +108,6 @@ namespace BinaryDetailer
                 binaryDetail.ProcessorArchitecture = pe;
 
                 binaryDetail.TargetFrameworkAttribute = GetCustomAttributeValue(reflectionOnlyAssembly, typeof(TargetFrameworkAttribute));
-                binaryDetail.AssemblyCompanyAttribute = GetCustomAttributeValue(reflectionOnlyAssembly, typeof(AssemblyCompanyAttribute));
-                binaryDetail.AssemblyCopyrightAttribute = GetCustomAttributeValue(reflectionOnlyAssembly, typeof(AssemblyCopyrightAttribute));
 
                 AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve
                     -= resolveEventHandler;
