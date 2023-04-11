@@ -13,7 +13,7 @@ ___
 
 ![Screenshot 1](data/screenshots/CMD-Arguments.jpg "CMD Arguments")
 
-![Screenshot 2](data/screenshots/Complete.jpg "Complete")
+![Screenshot 2](data/screenshots/complete.jpg "Complete")
 
 ![Screenshot 3](data/screenshots/Completed-csv.jpg "Completed CSV File")
 ___
