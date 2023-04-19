@@ -1,5 +1,5 @@
 # Binary Detailer
-Binary Detailer is a method of outputing binary details such as net framework, 64 bit compatibility, version etc. Given a directory name, it will iterate dll and exe files and output the results to a csv file.
+Binary Detailer is a method of outputting binary details such as net framework, 64-bit compatibility, version etc. Given a directory name, it will iterate dll and exe files and output the results to a csv file.
 ___
 
 ### Usage

@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
+
+// CMD command: BinaryDetailer.exe "C:\Program Files\dotnet\sdk\6.0.400\cs" doc
 
 namespace BinaryDetailer
 {
     internal class Program
     {
-        private static string currentBinary = string.Empty;
         private static List<string> ExcludeNames = new List<string>();
 
         private static void Main(string[] args)
@@ -24,6 +22,8 @@ namespace BinaryDetailer
                 }
             }
 
+            Export ex = new Export(ExcludeNames);
+
             List<BinaryDetail> binaryDetails = new List<BinaryDetail>();
             IEnumerable<string> allFiles = GetFiles(path, new[] { "*.dll", "*.exe" }, SearchOption.AllDirectories);
 
@@ -33,34 +33,15 @@ namespace BinaryDetailer
                 binaryDetails.Add(bd);
             }
 
-            CreateReport(binaryDetails);
-            Console.In.ReadLine();
-        }
+            ex.CreateReport(binaryDetails);
 
-        private static void CreateReport(List<BinaryDetail> binaryDetails)
-        {
-            string fileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                Guid.NewGuid() + ".csv");
-            File.Create(fileName).Close();
-            File.AppendAllLines(fileName, BinaryDetail.CSVHeader);
-            foreach (var binaryDetail in binaryDetails)
+            if (args.Length > 1 && args[1].ToLower().Equals("doc"))
             {
-                bool include = true;
-                foreach (string excludeName in ExcludeNames)
-                {
-                    if ((binaryDetail.AssemblyCompanyAttribute != null && binaryDetail.AssemblyCompanyAttribute.ToLower().Contains(excludeName)) ||
-                        (binaryDetail.AssemblyCopyrightAttribute != null && binaryDetail.AssemblyCopyrightAttribute.ToLower().Contains(excludeName)))
-                    {
-                        include = false;
-                    }
-                }
-
-                if (include == false) continue;
-
-                File.AppendAllLines(fileName, new[] { binaryDetail.ToCsv() });
+                ex.CreateWordDoc(binaryDetails);
             }
 
-            Console.WriteLine("File created at " + fileName);
+            Console.WriteLine("Export complete");
+            Console.In.ReadLine();
         }
 
         private static IEnumerable<string> GetFiles(string path,

@@ -33,12 +33,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BinaryDetail.cs" />
     <Compile Include="BinaryDetailFactory.cs" />
+    <Compile Include="Export.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -50,6 +52,9 @@
       <Version>1.5.1</Version>
     </PackageReference>
     <BinSkimFiles Include="$(PkgMicrosoft_CodeAnalysis_BinSkim)\tools\netcoreapp2.0\**\*.*" />
+    <PackageReference Include="Microsoft.Office.Interop.Word">
+      <Version>15.0.4797.1004</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="CopyBinSkim" AfterTargets="Build">
