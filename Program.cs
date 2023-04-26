@@ -42,7 +42,7 @@ namespace BinaryDetailer
                 ex.CreateWordDoc(binaryDetails);
             }
 
-            ex.GroupBinary(binaryDetails, @"C:\AVEVA\GIT\binarydetailer\GroupingConfig.xml");
+            ex.GroupBinary(binaryDetails, @"C:\AVEVA\GIT\binarydetailer\GroupingConfigExample.xml");
 
             ex.CreateReport(binaryDetails);
 
