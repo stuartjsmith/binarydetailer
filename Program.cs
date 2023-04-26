@@ -10,9 +10,11 @@ namespace BinaryDetailer
     internal class Program
     {
         private static List<string> ExcludeNames = new List<string>();
-
+        
         private static void Main(string[] args)
         {
+            List<BinaryDetail> groupedStrings = new List<BinaryDetail>();
+
             string path = args[0];
             if (args.Length > 0)
             {
@@ -39,6 +41,10 @@ namespace BinaryDetailer
             {
                 ex.CreateWordDoc(binaryDetails);
             }
+
+            ex.GroupBinary(binaryDetails, @"C:\AVEVA\GIT\binarydetailer\GroupingConfig.xml");
+
+            ex.CreateReport(binaryDetails);
 
             Console.WriteLine("Export complete");
             Console.In.ReadLine();

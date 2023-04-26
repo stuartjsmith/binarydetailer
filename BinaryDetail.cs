@@ -13,6 +13,7 @@ namespace BinaryDetailer
             FileInfo = fileInfo;
         }
 
+        public string GroupId { get; internal set; }
         public string Error { get; internal set; }
         public FileInfo FileInfo { get; internal set; }
         public ImageFileMachine ImageFileMachine { get; internal set; }
@@ -32,7 +33,7 @@ namespace BinaryDetailer
             {
                 return new[]
                 {
-                    "Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error"
+                    "Group Id, Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error"
                 };
             }
         }
@@ -40,6 +41,7 @@ namespace BinaryDetailer
         public string ToCsv()
         {
             return
+                "\"" + GroupId + "\"," +
                 "\"" + FileInfo.FullName + "\"," +
                 "\"" + FileInfo.Name + "\"," +
                 "\"" + AssemblyCompanyAttribute + "\"," +

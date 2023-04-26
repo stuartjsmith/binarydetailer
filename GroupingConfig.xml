@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<groups>
+  <group name="Infragistics">
+    <dll>Infragistics.Documents.Core.dll</dll>
+  </group>
+  <group name="Microsoft Corporation">
+    <dll>Microsoft.Build.Tasks.Core.resources.dll</dll>
+  </group>
+  <group name="Notepad++ Community">
+    <dll dllname ="nppPluginList.dll"/>
+    <dll dllname ="NppExport.dll"/>
+  </group>
+  <group name="Don HO don.h@free.fr">
+    <dll dllname ="mimeTools.dll"/>
+    <dll dllname ="NppConverter.dll"/>
+  </group>
+</groups>

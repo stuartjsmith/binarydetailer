@@ -1,9 +1,12 @@
-﻿using Microsoft.Office.Interop.Word;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
+using System.Xml.Linq;
+// Use of this library requires an install of Microsoft office
+using Microsoft.Office.Interop.Word;
 
 namespace BinaryDetailer
 {
@@ -15,6 +18,49 @@ namespace BinaryDetailer
         {
             ExcludeNames = excludeNames;
         }
+        public void GroupBinary(List<BinaryDetail> binaryDetails, string xmlFilePath)
+        {
+            List<BinaryDetail> groupedStrings = new List<BinaryDetail>();
+            XDocument xmlDoc = XDocument.Load(xmlFilePath);
+
+            foreach (var binaryDetail in binaryDetails)
+            {
+                // Set an escape from the loop once match is found
+                bool groupIdSet = false;
+
+                // Loop through each "group" element
+                foreach (XElement group in xmlDoc.Root.Elements("group"))
+                {
+                    if (groupIdSet == true)
+                    {
+                        break;
+                    }
+
+                    string groupName = group.Attribute("name").Value;
+
+                    if (binaryDetail.AssemblyCompanyAttribute == groupName)
+                    {
+                        // Loop through each "dll" element in the matching group
+                        foreach (XElement dll in group.Elements("dll"))
+                        {
+                            // Check if the "dllname" attribute matches a "FileInfo.Name"
+                            string dllName = dll.Attribute("dllname")?.Value ?? dll.Value;
+
+                            if (binaryDetail.FileInfo.Name == dllName)
+                            {
+                                binaryDetail.GroupId = groupName;
+                                groupIdSet = true;
+                                break;
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        binaryDetail.GroupId = "Unknown";
+                    }
+                }
+            }
+        }
 
         public void CreateReport(List<BinaryDetail> binaryDetails)
         {
@@ -22,6 +68,7 @@ namespace BinaryDetailer
                 Guid.NewGuid() + ".csv");
             File.Create(csvFileName).Close();
             File.AppendAllLines(csvFileName, BinaryDetail.CSVHeader);
+
             foreach (var binaryDetail in binaryDetails)
             {
                 bool include = true;
@@ -134,6 +181,7 @@ namespace BinaryDetailer
                 document = null;
                 winword.Quit(ref missing, ref missing, ref missing);
                 winword = null;
+
                 Console.WriteLine("Word Document created at " + filename);
             }
             catch (Exception ex)
@@ -151,10 +199,10 @@ namespace BinaryDetailer
                 switch (cell.ColumnIndex)
                 {
                     case 1:
-                        cell.Range.Text = "File Name";
+                        cell.Range.Text = "Group ID";
                         break;
                     case 2:
-                        cell.Range.Text = "Assembly Company Attribute";
+                        cell.Range.Text = "File Name";
                         break;
                     case 3:
                         cell.Range.Text = "Assembly Version";
@@ -187,10 +235,10 @@ namespace BinaryDetailer
                 switch (cell.ColumnIndex)
                 {
                     case 1:
-                        cell.Range.Text = binaryDetail.FileInfo.Name;
+                        cell.Range.Text = binaryDetail.GroupId;
                         break;
                     case 2:
-                        cell.Range.Text = binaryDetail.AssemblyCompanyAttribute;
+                        cell.Range.Text = binaryDetail.FileInfo.Name;
                         break;
                     case 3:
                         cell.Range.Text = binaryDetail.AssemblyVersion;
