@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace BinaryDetailer
 {
     internal class Program
     {
-        private static string currentBinary = string.Empty;
         private static List<string> ExcludeNames = new List<string>();
-
+        
         private static void Main(string[] args)
         {
+            List<BinaryDetail> groupedStrings = new List<BinaryDetail>();
+
             string path = args[0];
             if (args.Length > 0)
             {
@@ -23,6 +21,8 @@ namespace BinaryDetailer
                     ExcludeNames.Add(args[idx].ToLower());
                 }
             }
+
+            Export ex = new Export(ExcludeNames);
 
             List<BinaryDetail> binaryDetails = new List<BinaryDetail>();
             IEnumerable<string> allFiles = GetFiles(path, new[] { "*.dll", "*.exe" }, SearchOption.AllDirectories);
@@ -33,34 +33,36 @@ namespace BinaryDetailer
                 binaryDetails.Add(bd);
             }
 
-            CreateReport(binaryDetails);
-            Console.In.ReadLine();
-        }
-
-        private static void CreateReport(List<BinaryDetail> binaryDetails)
-        {
-            string fileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                Guid.NewGuid() + ".csv");
-            File.Create(fileName).Close();
-            File.AppendAllLines(fileName, BinaryDetail.CSVHeader);
-            foreach (var binaryDetail in binaryDetails)
+            if (args.Length > 1)
             {
-                bool include = true;
-                foreach (string excludeName in ExcludeNames)
+                foreach (var arg in args.Select((value, i) => new { i, value }))
                 {
-                    if ((binaryDetail.AssemblyCompanyAttribute != null && binaryDetail.AssemblyCompanyAttribute.ToLower().Contains(excludeName)) ||
-                        (binaryDetail.AssemblyCopyrightAttribute != null && binaryDetail.AssemblyCopyrightAttribute.ToLower().Contains(excludeName)))
+                    var index = arg.i;
+
+                    // Skip the first arg as this is the path to report on
+                    if (index.Equals(0)) continue;
+
+                    if (arg.value.ToLower().Equals("doc"))
                     {
-                        include = false;
+                        // Create word document
+                        ex.CreateWordDoc(binaryDetails);
+                    }
+                    else if (arg.value.ToLower().Equals("config"))
+                    {
+                        // Create a binary grouping based on a config.
+                        ex.GroupBinary(binaryDetails, args[index+1]);
+                        ex.CreateReport(binaryDetails);
                     }
                 }
-
-                if (include == false) continue;
-
-                File.AppendAllLines(fileName, new[] { binaryDetail.ToCsv() });
+            }
+            else
+            {
+                // Raw report
+                ex.CreateReport(binaryDetails);
             }
 
-            Console.WriteLine("File created at " + fileName);
+            Console.WriteLine("Export complete");
+            Console.In.ReadLine();
         }
 
         private static IEnumerable<string> GetFiles(string path,

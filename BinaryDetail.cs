@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -9,12 +8,12 @@ namespace BinaryDetailer
     [Serializable]
     public class BinaryDetail
     {
-
         public BinaryDetail(FileInfo fileInfo)
         {
             FileInfo = fileInfo;
         }
 
+        public string GroupId { get; internal set; }
         public string Error { get; internal set; }
         public FileInfo FileInfo { get; internal set; }
         public ImageFileMachine ImageFileMachine { get; internal set; }
@@ -23,14 +22,10 @@ namespace BinaryDetailer
         public ProcessorArchitecture ProcessorArchitecture { get; internal set; }
         public string TargetFrameworkAttribute { get; internal set; }
         public string AssemblyVersion { get; internal set; }
-
         public string FileVersion => FileVersionInfo.GetVersionInfo(FileInfo.FullName).FileVersion;
-
         public string ProductVersion => FileVersionInfo.GetVersionInfo(FileInfo.FullName).ProductVersion;
-
         public string AssemblyCompanyAttribute => FileVersionInfo.GetVersionInfo(FileInfo.FullName).CompanyName;
         public string AssemblyCopyrightAttribute => FileVersionInfo.GetVersionInfo(FileInfo.FullName).LegalCopyright;
-
 
         public static string[] CSVHeader
         {
@@ -38,15 +33,15 @@ namespace BinaryDetailer
             {
                 return new[]
                 {
-                    "Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error"
+                    "Group Id, Full Path,FileName,AssemblyCompanyAttribute,AssemblyCopyrightAttribute,AssemblyVersion,FileVersion,ProductVersion,ImageRuntimeVersion,TargetFrameworkAttribute,PortableExecutableKinds,ImageFileMachine,ProcessorArchitecture,Error"
                 };
             }
         }
 
-
         public string ToCsv()
         {
             return
+                "\"" + GroupId + "\"," +
                 "\"" + FileInfo.FullName + "\"," +
                 "\"" + FileInfo.Name + "\"," +
                 "\"" + AssemblyCompanyAttribute + "\"," +
