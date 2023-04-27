@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-// CMD command: BinaryDetailer.exe "C:\Program Files\dotnet\sdk\6.0.400\cs" doc
-
 namespace BinaryDetailer
 {
     internal class Program
@@ -35,16 +33,33 @@ namespace BinaryDetailer
                 binaryDetails.Add(bd);
             }
 
-            ex.CreateReport(binaryDetails);
-
-            if (args.Length > 1 && args[1].ToLower().Equals("doc"))
+            if (args.Length > 1)
             {
-                ex.CreateWordDoc(binaryDetails);
+                foreach (var arg in args.Select((value, i) => new { i, value }))
+                {
+                    var index = arg.i;
+
+                    // Skip the first arg as this is the path to report on
+                    if (index.Equals(0)) continue;
+
+                    if (arg.value.ToLower().Equals("doc"))
+                    {
+                        // Create word document
+                        ex.CreateWordDoc(binaryDetails);
+                    }
+                    else if (arg.value.ToLower().Equals("config"))
+                    {
+                        // Create a binary grouping based on a config.
+                        ex.GroupBinary(binaryDetails, args[index+1]);
+                        ex.CreateReport(binaryDetails);
+                    }
+                }
             }
-
-            ex.GroupBinary(binaryDetails, @"C:\AVEVA\GIT\binarydetailer\GroupingConfigExample.xml");
-
-            ex.CreateReport(binaryDetails);
+            else
+            {
+                // Raw report
+                ex.CreateReport(binaryDetails);
+            }
 
             Console.WriteLine("Export complete");
             Console.In.ReadLine();

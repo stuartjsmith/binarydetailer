@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
+
 // Use of this library requires an install of Microsoft office
 using Microsoft.Office.Interop.Word;
 
@@ -18,47 +19,58 @@ namespace BinaryDetailer
         {
             ExcludeNames = excludeNames;
         }
+
         public void GroupBinary(List<BinaryDetail> binaryDetails, string xmlFilePath)
         {
-            List<BinaryDetail> groupedStrings = new List<BinaryDetail>();
-            XDocument xmlDoc = XDocument.Load(xmlFilePath);
-
-            foreach (var binaryDetail in binaryDetails)
+            try 
             {
-                // Set an escape from the loop once match is found
-                bool groupIdSet = false;
+                // Load xml config file
+                XDocument xmlDoc = XDocument.Load(xmlFilePath);
 
-                // Loop through each "group" element
-                foreach (XElement group in xmlDoc.Root.Elements("group"))
+                // Loop through the binaries
+                foreach (var binaryDetail in binaryDetails)
                 {
-                    if (groupIdSet == true)
-                    {
-                        break;
-                    }
+                    // Set an escape from the loop once match is found
+                    bool groupIdSet = false;
 
-                    string groupName = group.Attribute("name").Value;
-
-                    if (binaryDetail.AssemblyCompanyAttribute == groupName)
+                    // Loop through each "group" element. I.E Company name
+                    foreach (XElement group in xmlDoc.Root.Elements("group"))
                     {
-                        // Loop through each "dll" element in the matching group
-                        foreach (XElement dll in group.Elements("dll"))
+                        if (groupIdSet == true) break;
+
+                        string groupName = group.Attribute("name").Value;
+
+                        // Check if the binary has a match in the config xml
+                        if (binaryDetail.AssemblyCompanyAttribute == groupName)
                         {
-                            // Check if the "dllname" attribute matches a "FileInfo.Name"
-                            string dllName = dll.Attribute("dllname")?.Value ?? dll.Value;
-
-                            if (binaryDetail.FileInfo.Name == dllName)
+                            // Loop through each "dll" element in the matching group
+                            // It is neccessarry to find the group first. It is possible a dll could be used in
+                            // another library in which case a license check needs to be done.
+                            foreach (XElement dll in group.Elements("dll"))
                             {
-                                binaryDetail.GroupId = groupName;
-                                groupIdSet = true;
-                                break;
+                                // Check if the "dllname" attribute matches a "FileInfo.Name"
+                                string dllName = dll.Attribute("dllname")?.Value ?? dll.Value;
+
+                                // If the dll in the config matches, set groupid
+                                if (binaryDetail.FileInfo.Name == dllName)
+                                {
+                                    binaryDetail.GroupId = groupName;
+                                    groupIdSet = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    else 
-                    {
-                        binaryDetail.GroupId = "Unknown";
+                        else
+                        {
+                            // If nothing matches
+                            binaryDetail.GroupId = "Unknown";
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -66,6 +78,7 @@ namespace BinaryDetailer
         {
             string csvFileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 Guid.NewGuid() + ".csv");
+
             File.Create(csvFileName).Close();
             File.AppendAllLines(csvFileName, BinaryDetail.CSVHeader);
 
@@ -96,21 +109,21 @@ namespace BinaryDetailer
                 string wordFileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     Guid.NewGuid() + ".docx");
 
-                //Create an instance for word app  
+                // Create an instance for word app  
                 Application winword = new Application
                 {
                     ShowAnimation = false,
                     Visible = false
                 };
 
-                //Create a missing variable for missing value  
+                // Create a missing variable for missing value  
                 object missing = Missing.Value;
 
-                //Create a new document  
+                // Create a new document  
                 Document document = winword.Documents.Add(ref missing, ref missing, ref missing, ref missing);
                 document.PageSetup.Orientation = WdOrientation.wdOrientLandscape;
 
-                //Add header into the document  
+                // Add header into the document  
                 foreach (Section section in document.Sections)
                 {
                     //Get the header range and add the header details.  
@@ -122,7 +135,7 @@ namespace BinaryDetailer
                     headerRange.Text = "Binary Detailer";
                 }
 
-                //Add the footers into the document  
+                // Add the footers into the document  
                 foreach (Section wordSection in document.Sections)
                 {
                     //Get the footer range and add the footer details.  
@@ -133,7 +146,7 @@ namespace BinaryDetailer
                     footerRange.Text = "Github repository: https://github.com/stuartjsmith/binarydetailer";
                 }
 
-                //adding text to document  
+                // Adding text to document  
                 document.Content.SetRange(0, 0);
                 string firstLine = "Binary Detailer is a method of outputting binary details such as net framework, " +
                     "64-bit compatibility, version etc. Given a directory name, it will iterate dll and exe files " +
@@ -141,24 +154,27 @@ namespace BinaryDetailer
 
                 document.Content.Text = firstLine + Environment.NewLine;
 
-                //Add paragraph with Heading 1 style  
+                // Add paragraph with Heading 1 style  
                 Paragraph para1 = document.Content.Paragraphs.Add(ref missing);
                 object styleHeading1 = "Heading 1";
                 para1.Range.set_Style(ref styleHeading1);
                 para1.Range.Text = "Binary Details";
                 para1.Range.InsertParagraphAfter();
 
-                //Create a 5X5 table and insert some dummy record (+1 in count to allow for a column heading)
-                Table firstTable = document.Tables.Add(para1.Range, binaryDetails.Count + 1, 4, ref missing, ref missing);
+                // Create a table
+                Table table = document.Tables.Add(para1.Range, binaryDetails.Count + 1, 5, ref missing, ref missing);
 
                 // Define column headings
-                WordColumnHeadings(firstTable);
+                WordColumnHeadings(table);
 
-                firstTable.Borders.Enable = 1;
+                // Add table borders
+                table.Borders.Enable = 1;
+
+                // Loop through each binary and add to the table.
                 foreach (var binaryDetail in binaryDetails.Select((value, i) => new { i, value }))
                 {
-
                     bool include = true;
+
                     foreach (string excludeName in ExcludeNames)
                     {
                         if ((binaryDetail.value.AssemblyCompanyAttribute != null && binaryDetail.value.AssemblyCompanyAttribute.ToLower().Contains(excludeName)) ||
@@ -171,7 +187,7 @@ namespace BinaryDetailer
                     if (include == false) continue;
 
                     // Passing the index + 2 as there is a heading column to overcome.
-                    WordRowData(binaryDetail.i + 2, firstTable, binaryDetail.value);
+                    WordRowData(binaryDetail.i + 2, table, binaryDetail.value);
                 }
 
                 //Save the document  
@@ -202,12 +218,15 @@ namespace BinaryDetailer
                         cell.Range.Text = "Group ID";
                         break;
                     case 2:
-                        cell.Range.Text = "File Name";
+                        cell.Range.Text = "Company Name";
                         break;
                     case 3:
-                        cell.Range.Text = "Assembly Version";
+                        cell.Range.Text = "File Name";
                         break;
                     case 4:
+                        cell.Range.Text = "Assembly Version";
+                        break;
+                    case 5:
                         cell.Range.Text = "File Version";
                         break;
                 }
@@ -217,7 +236,7 @@ namespace BinaryDetailer
                 cell.Range.Font.Name = "verdana";
                 cell.Range.Font.Size = 10;
 
-                // cell.Range.Font.ColorIndex = WdColorIndex.wdGray25;                              
+                // Cell shading                             
                 cell.Shading.BackgroundPatternColor = WdColor.wdColorGray25;
 
                 // Center alignment for the Header cells  
@@ -238,12 +257,15 @@ namespace BinaryDetailer
                         cell.Range.Text = binaryDetail.GroupId;
                         break;
                     case 2:
-                        cell.Range.Text = binaryDetail.FileInfo.Name;
+                        cell.Range.Text = binaryDetail.AssemblyCompanyAttribute;
                         break;
                     case 3:
-                        cell.Range.Text = binaryDetail.AssemblyVersion;
+                        cell.Range.Text = binaryDetail.FileInfo.Name;
                         break;
                     case 4:
+                        cell.Range.Text = binaryDetail.AssemblyVersion;
+                        break;
+                    case 5:
                         cell.Range.Text = binaryDetail.FileVersion;
                         break;
                 }
